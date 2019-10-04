@@ -1,6 +1,9 @@
 package seedu.address.model.person;
 import static java.util.Objects.requireNonNull;
 
+/**
+ * Represents a person's remark.
+ */
 public class Remark {
     public final String value;
 
