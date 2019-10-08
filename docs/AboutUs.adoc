@@ -36,3 +36,12 @@ Role: Developer +
 Responsibilities: TBC
 
 '''
+
+=== Shawn Chew
+image::shawnpunchew11.png[width="150", align="left"]
+{empty}[http://github.com/shawnpunchew11[github]] [<<shawnpuncehew11#, portfolio>>]
+
+Role: Developer +
+Responsibilities: TBC
+
+'''
