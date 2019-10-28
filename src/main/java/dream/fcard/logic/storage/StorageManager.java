@@ -1,8 +1,5 @@
 package dream.fcard.logic.storage;
 
-import dream.fcard.gui.Gui;
-import dream.fcard.model.TestCase;
-import dream.fcard.model.cards.JavaCard;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -17,9 +14,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import dream.fcard.gui.Gui;
 import dream.fcard.model.Deck;
+import dream.fcard.model.TestCase;
 import dream.fcard.model.cards.FlashCard;
 import dream.fcard.model.cards.FrontBackCard;
+import dream.fcard.model.cards.JavaCard;
 import dream.fcard.model.cards.JavascriptCard;
 import dream.fcard.model.cards.MultipleChoiceCard;
 import dream.fcard.model.exceptions.DuplicateInChoicesException;

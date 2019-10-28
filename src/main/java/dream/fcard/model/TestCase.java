@@ -1,14 +1,14 @@
 package dream.fcard.model;
 
-import dream.fcard.logic.storage.Schema;
-import dream.fcard.util.json.JsonInterface;
-import dream.fcard.util.json.jsontypes.JsonObject;
-import dream.fcard.util.json.jsontypes.JsonValue;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+import dream.fcard.logic.storage.Schema;
 import dream.fcard.util.FileReadWrite;
 import dream.fcard.util.datastructures.Pair;
+import dream.fcard.util.json.JsonInterface;
+import dream.fcard.util.json.jsontypes.JsonObject;
+import dream.fcard.util.json.jsontypes.JsonValue;
 
 /**
  * An object representing 1 input test case and 1 expected output file.
