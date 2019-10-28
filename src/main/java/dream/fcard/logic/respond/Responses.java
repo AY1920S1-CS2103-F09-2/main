@@ -43,13 +43,16 @@ enum Responses {
             StorageManager.provideRoot(path);
             programState.reloadAllDecks(StorageManager.loadDecks());
             Gui.showStatus("Successfully changed root");
+            LogsCenter.getLogger(Responses.class).info("changed root directory to " + path);
         } else {
             Gui.showError("argument is not a valid directory");
+            LogsCenter.getLogger(Responses.class).warning("failed to change root directory; invalid path");
         }
         return true;
     }),
     ROOT_NO_PATH("(?i)^r(oot)?(\\s)*", (commandInput, programState) -> {
         Gui.showError("No directory specified, e.g. root ~/Desktop");
+        LogsCenter.getLogger(Responses.class).warning("failed to change root directory; no path specified");
         return true;
     }),
     IMPORT("(?i)^i(mport)?(\\s)+.+", (commandInput, programState) -> {
@@ -60,13 +63,16 @@ enum Responses {
             StorageManager.writeDeck(deck);
             programState.addDeck(deck);
             Gui.showStatus("Successfully added " + path);
+            LogsCenter.getLogger(Responses.class).info("imported deck from " + path);
         } else {
             Gui.showError("File does not exist, or file does not match schema for a deck");
+            LogsCenter.getLogger(Responses.class).warning("failed to import deck; file error");
         }
         return true;
     }),
     IMPORT_NO_PATH("(?i)^i(mport)?(\\s)*", (commandInput, programState) -> {
         Gui.showError("No path specified, e.g. import ~/Desktop/file.json");
+        LogsCenter.getLogger(Responses.class).warning("failed to import deck; no path specified");
         return true;
     }),
     EXPORT("(?i)^exp(ort)?(\\s)+deck/(\\s)*.+(\\s)+path/(\\s)*.+", (commandInput, programState) -> {
@@ -77,18 +83,22 @@ enum Responses {
         try {
             Deck d = programState.getDeck(deckName);
             FileReadWrite.write(FileReadWrite.resolve(pathName, "./" + d.getName() + ".json"), d.toJson().toString());
+            LogsCenter.getLogger(Responses.class).info("exported deck '" + deckName + "' to " + pathName);
         } catch (DeckNotFoundException e) {
             Gui.showError("Deck '" + deckName + "'does not exist");
+            LogsCenter.getLogger(Responses.class).warning("failed to export non existing deck `" + deckName + "'");
         }
 
         return true;
     }),
     EXPORT_NO_PATH("(?i)^exp(ort)?(\\s)+deck/(\\s)*.+", (commandInput, programState) -> {
         Gui.showError("No path specified, e.g. export deck/ deckName path/ ~/Desktop");
+        LogsCenter.getLogger(Responses.class).warning("failed to export deck; no path specified");
         return true;
     }),
     EXPORT_NO_DECK("(?i)^exp(ort)?.*", (commandInput, programState) -> {
         Gui.showError("No deck specified, e.g. export deck/ deckName path/ ~/Desktop");
+        LogsCenter.getLogger(Responses.class).warning("failed to export deck; no deck specified");
         return true;
     }),
     STATS("(?i)^(stats)?(\\s)*(deck/[\\w\\p{Punct}]+)?(\\s)*", (commandInput, programState) -> {
