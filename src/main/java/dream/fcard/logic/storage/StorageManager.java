@@ -1,5 +1,6 @@
 package dream.fcard.logic.storage;
 
+import dream.fcard.gui.Gui;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -177,21 +178,21 @@ public class StorageManager {
 
                         break;
                     default:
-                        System.out.println("Unexpected card type, but silently continues");
+                        Gui.showError("Unexpected card type, but silently continues");
                         continue;
                     }
                     cards.add(card);
                 }
                 return new Deck(cards, deckJson.get(Schema.DECK_NAME).getString());
             } catch (JsonWrongValueException e1) {
-                System.out.println("JSON file wrong schema");
+                Gui.showError("JSON file wrong schema");
             } catch (DuplicateInChoicesException d) {
-                System.out.println("Duplicated choices detected in Multiple Choice Card.");
+                Gui.showError("Duplicated choices detected in Multiple Choice Card.");
             } catch (IndexNotFoundException i) {
-                System.out.println(i.getMessage());
+                Gui.showError(i.getMessage());
             }
         } catch (JsonFormatException e2) {
-            System.out.println("JSON file has errors\n" + e2.getMessage());
+            Gui.showError("JSON file has errors\n" + e2.getMessage());
         }
         return null;
     }

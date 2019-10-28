@@ -65,7 +65,6 @@ enum Responses {
             Gui.showStatus("Successfully added " + path);
             LogsCenter.getLogger(Responses.class).info("imported deck from " + path);
         } else {
-            Gui.showError("File does not exist, or file does not match schema for a deck");
             LogsCenter.getLogger(Responses.class).warning("failed to import deck; file error");
         }
         return true;
