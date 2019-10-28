@@ -1,6 +1,8 @@
 package dream.fcard.logic.storage;
 
 import dream.fcard.gui.Gui;
+import dream.fcard.model.TestCase;
+import dream.fcard.model.cards.JavaCard;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -176,6 +178,19 @@ public class StorageManager {
                                 cardJson.get(Schema.BACK_FIELD).getString(),
                                 choices);
 
+                        break;
+                    case Schema.JAVA_TYPE:
+                        ArrayList<TestCase> cases = new ArrayList<>();
+                        for (JsonValue caseJson : cardJson.get(Schema.JAVA_CASES).getArray()) {
+                            JsonObject caseJsonObj = caseJson.getObject();
+                            TestCase caseObj = new TestCase(
+                                    new File(caseJsonObj.get(Schema.TESTCASE_INPUT).getString()),
+                                    new File(caseJsonObj.get(Schema.TESTCASE_OUTPUT).getString()));
+                            cases.add(caseObj);
+                        }
+                        card = new JavaCard(
+                                cardJson.get(Schema.FRONT_FIELD).getString(),
+                                cases);
                         break;
                     default:
                         Gui.showError("Unexpected card type, but silently continues");
