@@ -49,6 +49,7 @@ public class JsTestCaseRunner {
      * @param expectedOutput the user's assertions.
      * @return the final piece of code that the evaluator can use to score the user.
      */
+
     private String processJs(String userInput, String expectedOutput) {
         StringBuilder sb = new StringBuilder();
         sb.append("var correct = 0;\n"
@@ -57,6 +58,7 @@ public class JsTestCaseRunner {
                 + "\n"
                 + "function assert(actual, expected) {\n"
                 + "    if (actual == expected) {\n"
+
                 + "        correct++;"
                 + "        print('pass');\n"
                 + "    } else {\n"
