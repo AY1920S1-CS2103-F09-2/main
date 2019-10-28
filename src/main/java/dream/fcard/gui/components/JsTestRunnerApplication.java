@@ -13,10 +13,20 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 
+/**
+ * The application window for the popup window that connects to a Javascript Card.
+ */
 public class JsTestRunnerApplication extends Application {
 
-    Consumer<Pair<Integer, Pair<Integer, Integer>>> sendResult;
-    JavascriptCard card;
+    private Consumer<Pair<Integer, Pair<Integer, Integer>>> sendResult;
+    private JavascriptCard card;
+
+
+    public JsTestRunnerApplication(Consumer<Pair<Integer, Pair<Integer, Integer>>> sendResult, JavascriptCard c) {
+        super();
+        this.sendResult = sendResult;
+        this.card = c;
+    }
 
     @Override
     public void start(Stage stage) {
@@ -29,19 +39,14 @@ public class JsTestRunnerApplication extends Application {
             TextArea textArea = (TextArea) ap.getChildren().get(2);
             textArea.setText(boilerPlate());
             ap.getChildren().get(2).requestFocus();
-            ((JsTestEvaluator) fxmlloader.getController()).setCodeReturner(sendResult);
-            ((JsTestEvaluator) fxmlloader.getController()).setCard(card);
+            JsTestEvaluator e = ((JsTestEvaluator) fxmlloader.getController());
+            e.setCodeReturner(sendResult);
+            e.setCard(card);
             stage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-    }
-
-    public JsTestRunnerApplication(Consumer<Pair<Integer, Pair<Integer, Integer>>> sendResult, JavascriptCard c) {
-        super();
-        this.sendResult = sendResult;
-        this.card = c;
     }
 
     /**

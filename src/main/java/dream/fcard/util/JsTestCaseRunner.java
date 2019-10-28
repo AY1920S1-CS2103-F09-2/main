@@ -13,14 +13,14 @@ public class JsTestCaseRunner {
     private String userAttempt;
     private String consoleDisplay;
 
-    public String getConsoleDisplay() {
-        return consoleDisplay;
-    }
-
 
     public JsTestCaseRunner(String codeToRun, String expectedOutput) {
         this.expectedOutput = expectedOutput;
         this.userAttempt = codeToRun;
+    }
+
+    public String getConsoleDisplay() {
+        return consoleDisplay;
     }
 
     /**
@@ -29,10 +29,10 @@ public class JsTestCaseRunner {
      * @return (TotalTestCases, ( TotalCorrect, TotalWrong)) in a Pair object.
      */
     public Pair<Integer, Pair<Integer, Integer>> testCode() {
-        String finalCode = processJS(userAttempt, expectedOutput);
+        String finalCode = processJs(userAttempt, expectedOutput);
         String output = JavascriptRunner.evaluateString(finalCode);
         consoleDisplay = output;
-        output = output.replaceAll("pass","")
+        output = output.replaceAll("pass", "")
                 .replaceAll("fail", "")
                 .strip();
         Scanner sc = new Scanner(output);
@@ -49,7 +49,7 @@ public class JsTestCaseRunner {
      * @param expectedOutput the user's assertions.
      * @return the final piece of code that the evaluator can use to score the user.
      */
-    private String processJS(String userInput, String expectedOutput) {
+    private String processJs(String userInput, String expectedOutput) {
         StringBuilder sb = new StringBuilder();
         sb.append("var correct = 0;\n"
                 + "var wrong = 0;\n"

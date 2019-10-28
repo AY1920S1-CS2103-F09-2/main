@@ -60,6 +60,7 @@ public class JavascriptCard extends FlashCard {
      */
     @Override
     public Boolean evaluate(String in) {
+
         return null;
     }
 
