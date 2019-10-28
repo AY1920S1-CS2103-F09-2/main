@@ -44,4 +44,9 @@ public class JavaCard extends FlashCard {
     public void editBack(String newText) {
         //irrelevant
     }
+
+    @Override
+    public boolean hasChoices() {
+        return false;
+    }
 }
