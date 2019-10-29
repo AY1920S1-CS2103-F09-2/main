@@ -1,14 +1,17 @@
 package dream.fcard.logic.respond;
 
-import java.util.ArrayList;
-
 import dream.fcard.core.commons.core.LogsCenter;
+
 import dream.fcard.gui.Gui;
+import dream.fcard.logic.exam.Exam;
+import dream.fcard.logic.exam.ExamRunner;
 import dream.fcard.logic.respond.commands.CreateCommand;
 import dream.fcard.logic.respond.commands.EditCommand;
 import dream.fcard.logic.storage.StorageManager;
 import dream.fcard.model.Deck;
 import dream.fcard.model.State;
+import dream.fcard.model.StateEnum;
+import dream.fcard.model.cards.FlashCard;
 import dream.fcard.model.exceptions.DeckNotFoundException;
 import dream.fcard.model.exceptions.IndexNotFoundException;
 import dream.fcard.util.FileReadWrite;
@@ -20,6 +23,29 @@ enum Responses {
     LOGGER(".*", (commandInput, programState) -> {
         return false;
     }),
+
+    NEXT("(?i)^(next)(\\s)?", (commandInput, programState) -> {
+        LogsCenter.getLogger(Responses.class).info("Current command is NEXT");
+        if (programState.getCurrentState() == StateEnum.TEST_ONGOING_WAITING_NEXT) {
+            Exam exam = ExamRunner.getCurrentExam();
+            exam.upIndex();
+            try {
+                FlashCard newCard = exam.getCurrentCard();
+                String question = newCard.getFront();
+                LogsCenter.getLogger(Responses.class).info(question);
+                programState.setCurrentState(StateEnum.TEST_ONGOING_WAITING_ANS);
+            } catch (IndexOutOfBoundsException e) {
+                LogsCenter.getLogger(Responses.class).info("You have reached the end of the test!");
+                LogsCenter.getLogger(Responses.class).info(exam.getResult());
+                programState.setCurrentState(StateEnum.DEFAULT);
+            }
+        } else {
+            //eventually make into exception
+            LogsCenter.getLogger(Responses.class).info("There is no active test right now!");
+        }
+        return true;
+    }),
+
     HELP("(?i)^(help)?(\\s)*(command/[\\w\\p{Punct}]+)?(\\s)*", (commandInput, programState) -> {
         System.out.println("Current command is HELP");
         /*Print out "Available commands are:\n" +
@@ -101,35 +127,24 @@ enum Responses {
         return true;
     }),
     STATS("(?i)^(stats)?(\\s)*(deck/[\\w\\p{Punct}]+)?(\\s)*", (commandInput, programState) -> {
-        System.out.println("Current command is STATS");
-        // ArrayList<Deck> allDecks = programState.getDecks();
-        // String inputName = *name of deck to find*;
-        // for (Deck curr : allDecks) {
-        //      if(curr.getName().equals(inputName) {
-        //         System.out.println(curr.getStats());
-        //      }
-        // }
+        LogsCenter.getLogger(Responses.class).info("Current command is STATS");
+        String deckName = commandInput.replaceFirst("(?i)^(stats)?(\\s)*deck/", "");
+        if (deckName.strip().equals("")) {
+            Gui.renderStats(programState.getStatistics());
+        } else {
+            Gui.renderStats(programState.getDeck(deckName).getStatistics());
+        }
+
         return true; // capture is valid, end checking other commands
     }),
-    VIEW("(?i)^(view)?(\\s)*(deck/[\\S\\p{Punct}]+)?(\\s)*", (commandInput, programState) -> {
-        //System.out.println("Current command is VIEW");
+
+    VIEW("(?i)^(view)?(\\s)*(deck/[\\S\\p{Punct}]+){1}?(\\s)*", (commandInput, programState) -> {
         LogsCenter.getLogger(Responses.class).info("Current command is VIEW");
+        String deckName = commandInput.replaceFirst("(?i)^(view)?(\\s)*deck/", "");
+        //System.out.println(test.trim());
+        Deck d = programState.getDeck(deckName);
+        Gui.renderDeck(d);
 
-        // ArrayList<Deck> allDecks = programState.getDecks();
-        //  String inputName = *name of deck to find*;
-        //  for (Deck curr : allDecks) {
-        //      if(curr.getName().equals(inputName) {
-        //          curr.viewDeck();
-        //      }
-        //  }
-
-        ArrayList<Deck> decks = programState.getDecks();
-        for (int i = 0; i < decks.size(); i++) {
-            Deck d = decks.get(i);
-            Gui.renderDeck(d);
-
-            System.out.println("Deck #1: " + decks.get(i).getName());
-        }
         return true; // capture is valid, end checking other commands
     }),
 
@@ -198,17 +213,22 @@ enum Responses {
 
 
 
-    TEST("(?i)^(test)?(\\\\s)+(duration/[\\\\w\\\\p{Punct}]+)?(\\\\s)+(deck/[\\\\w\\\\p{Punct}]+){1}(\\\\s)*", (
+    TEST("(?i)^(test)?(\\s)+(duration/[\\w\\p{Punct}]+)?(\\s)+(deck/[\\w\\p{Punct}]+){1}(\\s)*", (
             commandInput, programState) -> {
         System.out.println("Current command is TEST");
-        // ArrayList<Deck> allDecks = programState.getDecks();
-        // String inputName = *name of deck to find*;
-        // Deck testDeck;
-        // for (Deck curr : allDecks) {
-        //      if(curr.getName().equals(inputName) {
-        //          testDeck = curr;
-        //      }
-        // }
+        String inputName = commandInput.split("deck/")[1];
+        try {
+            Deck retrievedDeck = programState.getDeck(inputName);
+            ExamRunner.createExam(retrievedDeck);
+            Exam exam = ExamRunner.getCurrentExam();
+            FlashCard currentCard = exam.getCurrentCard();
+            String question = currentCard.getFront();
+            programState.setCurrentState(StateEnum.TEST_ONGOING_WAITING_ANS);
+            LogsCenter.getLogger(Responses.class).info(question);
+        } catch (DeckNotFoundException e) {
+            e.printStackTrace();
+        }
+
         // *Initiate test with Test Deck*
         return true; // capture is valid, end checking other commands
     }),
@@ -287,13 +307,24 @@ enum Responses {
             }),
 
     UNKNOWN(".*", (commandInput, programState) -> {
-        System.out.println("Sorry, I don't know what is this command.");
-        //logger.warning("Unknown command entered.");
+        StateEnum currentState = programState.getCurrentState();
+        if (currentState == StateEnum.TEST_ONGOING_WAITING_ANS) {
+            Exam exam = ExamRunner.getCurrentExam();
+            exam.parseUserInputAndGrade(commandInput);
+            FlashCard currentCard = exam.getCurrentCard();
+            String answer = currentCard.getBack();
+            LogsCenter.getLogger(Responses.class).info(answer);
+            programState.setCurrentState(StateEnum.TEST_ONGOING_WAITING_NEXT);
+            return true;
+        } else {
+            System.out.println("Sorry, I don't know what is this command.");
+            //logger.warning("Unknown command entered.");
 
-        // violates some rules, but workaround to prevent illegal forward reference
-        LogsCenter.getLogger(Responses.class).warning("Unknown command entered.");
-        Gui.showError("Sorry, I don't know what is this command.");
-        return false;
+            // violates some rules, but workaround to prevent illegal forward reference
+            LogsCenter.getLogger(Responses.class).warning("Unknown command entered.");
+            Gui.showError("Sorry, I don't know what is this command.");
+            return false;
+        }
     });
 
     private String regex;
