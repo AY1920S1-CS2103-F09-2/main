@@ -2,8 +2,8 @@ package dream.fcard.model.cards;
 
 import java.util.ArrayList;
 
-import dream.fcard.logic.storage.Schema;
 import dream.fcard.logic.stats.CardStats;
+import dream.fcard.logic.storage.Schema;
 import dream.fcard.model.TestCase;
 import dream.fcard.util.json.exceptions.JsonWrongValueException;
 import dream.fcard.util.json.jsontypes.JsonArray;
