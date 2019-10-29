@@ -68,38 +68,39 @@ enum Responses {
         if (FileReadWrite.pathValidDirectory(path)) {
             StorageManager.provideRoot(path);
             programState.reloadAllDecks(StorageManager.loadDecks());
-            System.out.println("Successfully changed root");
+            Gui.showStatus("Successfully changed root");
+            LogsCenter.getLogger(Responses.class).info("changed root directory to " + path);
         } else {
-            System.out.println("argument is not a valid directory");
+            Gui.showError("argument is not a valid directory");
+            LogsCenter.getLogger(Responses.class).warning("failed to change root directory; invalid path");
         }
         return true;
     }),
     ROOT_NO_PATH("(?i)^r(oot)?(\\s)*", (commandInput, programState) -> {
-        System.out.println("No directory specified, e.g. root ~/Desktop");
+        Gui.showError("No directory specified, e.g. root ~/Desktop");
+        LogsCenter.getLogger(Responses.class).warning("failed to change root directory; no path specified");
         return true;
     }),
     IMPORT("(?i)^i(mport)?(\\s)+.+", (commandInput, programState) -> {
-        System.out.println("Current command is IMPORT");
-
         String path = commandInput.split(" ")[1].trim();
 
         Deck deck = StorageManager.loadDeck(path);
         if (deck != null) {
             StorageManager.writeDeck(deck);
             programState.addDeck(deck);
-            System.out.println("Successfully added " + path);
+            Gui.showStatus("Successfully added " + path);
+            LogsCenter.getLogger(Responses.class).info("imported deck from " + path);
         } else {
-            System.out.println("File does not exist, or file does not match schema for a deck");
+            LogsCenter.getLogger(Responses.class).warning("failed to import deck; file error");
         }
         return true;
     }),
     IMPORT_NO_PATH("(?i)^i(mport)?(\\s)*", (commandInput, programState) -> {
-        System.out.println("No path specified, e.g. import ~/Desktop/file.json");
+        Gui.showError("No path specified, e.g. import ~/Desktop/file.json");
+        LogsCenter.getLogger(Responses.class).warning("failed to import deck; no path specified");
         return true;
     }),
     EXPORT("(?i)^exp(ort)?(\\s)+deck/(\\s)*.+(\\s)+path/(\\s)*.+", (commandInput, programState) -> {
-        System.out.println("Current command is EXPORT");
-
         String[] parts = commandInput.split("deck/")[1].split("path/");
         String deckName = parts[0].trim();
         String pathName = parts[1].trim();
@@ -107,18 +108,22 @@ enum Responses {
         try {
             Deck d = programState.getDeck(deckName);
             FileReadWrite.write(FileReadWrite.resolve(pathName, "./" + d.getName() + ".json"), d.toJson().toString());
+            LogsCenter.getLogger(Responses.class).info("exported deck '" + deckName + "' to " + pathName);
         } catch (DeckNotFoundException e) {
-            System.out.println("Deck does not exist");
+            Gui.showError("Deck '" + deckName + "'does not exist");
+            LogsCenter.getLogger(Responses.class).warning("failed to export non existing deck `" + deckName + "'");
         }
 
         return true;
     }),
     EXPORT_NO_PATH("(?i)^exp(ort)?(\\s)+deck/(\\s)*.+", (commandInput, programState) -> {
-        System.out.println("No path specified, e.g. export deck/ deckName path/ ~/Desktop");
+        Gui.showError("No path specified, e.g. export deck/ deckName path/ ~/Desktop");
+        LogsCenter.getLogger(Responses.class).warning("failed to export deck; no path specified");
         return true;
     }),
     EXPORT_NO_DECK("(?i)^exp(ort)?.*", (commandInput, programState) -> {
-        System.out.println("No deck specified, e.g. export deck/ deckName path/ ~/Desktop");
+        Gui.showError("No deck specified, e.g. export deck/ deckName path/ ~/Desktop");
+        LogsCenter.getLogger(Responses.class).warning("failed to export deck; no deck specified");
         return true;
     }),
     STATS("(?i)^(stats)?(\\s)*(deck/[\\w\\p{Punct}]+)?(\\s)*", (commandInput, programState) -> {

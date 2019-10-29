@@ -14,9 +14,12 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import dream.fcard.gui.Gui;
 import dream.fcard.model.Deck;
+import dream.fcard.model.TestCase;
 import dream.fcard.model.cards.FlashCard;
 import dream.fcard.model.cards.FrontBackCard;
+import dream.fcard.model.cards.JavaCard;
 import dream.fcard.model.cards.JavascriptCard;
 import dream.fcard.model.cards.MultipleChoiceCard;
 import dream.fcard.model.exceptions.DuplicateInChoicesException;
@@ -176,22 +179,35 @@ public class StorageManager {
                                 choices);
 
                         break;
+                    case Schema.JAVA_TYPE:
+                        ArrayList<TestCase> cases = new ArrayList<>();
+                        for (JsonValue caseJson : cardJson.get(Schema.JAVA_CASES).getArray()) {
+                            JsonObject caseJsonObj = caseJson.getObject();
+                            TestCase caseObj = new TestCase(
+                                    new File(caseJsonObj.get(Schema.TESTCASE_INPUT).getString()),
+                                    new File(caseJsonObj.get(Schema.TESTCASE_OUTPUT).getString()));
+                            cases.add(caseObj);
+                        }
+                        card = new JavaCard(
+                                cardJson.get(Schema.FRONT_FIELD).getString(),
+                                cases);
+                        break;
                     default:
-                        System.out.println("Unexpected card type, but silently continues");
+                        Gui.showError("Unexpected card type, but silently continues");
                         continue;
                     }
                     cards.add(card);
                 }
                 return new Deck(cards, deckJson.get(Schema.DECK_NAME).getString());
             } catch (JsonWrongValueException e1) {
-                System.out.println("JSON file wrong schema");
+                Gui.showError("JSON file wrong schema");
             } catch (DuplicateInChoicesException d) {
-                System.out.println("Duplicated choices detected in Multiple Choice Card.");
+                Gui.showError("Duplicated choices detected in Multiple Choice Card.");
             } catch (IndexNotFoundException i) {
-                System.out.println(i.getMessage());
+                Gui.showError(i.getMessage());
             }
         } catch (JsonFormatException e2) {
-            System.out.println("JSON file has errors\n" + e2.getMessage());
+            Gui.showError("JSON file has errors\n" + e2.getMessage());
         }
         return null;
     }

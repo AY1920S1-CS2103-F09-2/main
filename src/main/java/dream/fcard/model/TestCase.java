@@ -3,13 +3,17 @@ package dream.fcard.model;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+import dream.fcard.logic.storage.Schema;
 import dream.fcard.util.FileReadWrite;
 import dream.fcard.util.datastructures.Pair;
+import dream.fcard.util.json.JsonInterface;
+import dream.fcard.util.json.jsontypes.JsonObject;
+import dream.fcard.util.json.jsontypes.JsonValue;
 
 /**
  * An object representing 1 input test case and 1 expected output file.
  */
-public class TestCase {
+public class TestCase implements JsonInterface {
     private File input;
     private File expectedOutput;
 
@@ -42,5 +46,13 @@ public class TestCase {
 
     public boolean hasMissingExpectedOutput() {
         return expectedOutput == null;
+    }
+
+    @Override
+    public JsonValue toJson() {
+        JsonObject obj = new JsonObject();
+        obj.put(Schema.TESTCASE_INPUT, input.getAbsolutePath());
+        obj.put(Schema.TESTCASE_OUTPUT, expectedOutput.getAbsolutePath());
+        return new JsonValue(obj);
     }
 }
